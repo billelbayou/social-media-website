@@ -1,13 +1,36 @@
-import {register} from "@/action/user";
+"use client";
+import { useState } from "react";
+import { register } from "@/app/_actions/register"; // Import your server action
 
 export default function Register() {
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default form submission
+    setEmailError(null); // Reset any previous errors
+
+    const formData = new FormData(e.currentTarget);
+
+    // Call the server-side register action
+    const response = await register(formData);
+
+    if (!response.success) {
+      // If there's an error (like the email already exists), show it
+      setEmailError(response.message || "An unknown error occurred.");
+      return;
+    }
+
+    // Handle successful registration (e.g., redirect to login page)
+    window.location.href = "/login";
+  };
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold text-center text-gray-700 mb-8">
           Register
         </h2>
-        <form action={register}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="firstName"
@@ -53,6 +76,9 @@ export default function Register() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+            {emailError && (
+              <p className="text-red-500 text-sm mt-1">{emailError}</p>
+            )}
           </div>
 
           <div className="mb-6">

@@ -1,16 +1,35 @@
-import { login } from "@/action/user";
-import Link from "next/link";
-import React from "react";
+"use client";
+import { useState } from "react";
+import { login } from "@/app/_actions/login"; // Import the server-side login action
 
 export default function Login() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent the default form submission
+    setErrorMessage(null); // Reset previous errors
+
+    const formData = new FormData(e.currentTarget);
+
+    // Call the server-side login action
+    const response = await login(formData);
+
+    if (!response.success) {
+      setErrorMessage(response.message); // Show error if login fails
+      return;
+    }
+
+    // Handle successful login (e.g., redirect or show a success message)
+    window.location.href = "/";
+  };
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold text-center text-gray-700 mb-8">
           Login
         </h2>
-        <form action={login}>
-          {/* Email */}
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -27,8 +46,7 @@ export default function Login() {
             />
           </div>
 
-          {/* Password */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label
               htmlFor="password"
               className="block text-gray-700 text-sm font-bold mb-2"
@@ -44,7 +62,10 @@ export default function Login() {
             />
           </div>
 
-          {/* Submit Button */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+          )}
+
           <div className="flex items-center justify-between">
             <button
               type="submit"
@@ -54,8 +75,6 @@ export default function Login() {
             </button>
           </div>
         </form>
-        <p>Are you new here ? Click <Link className="text-blue-500" href={"/register"}>here</Link></p>
-        
       </div>
     </div>
   );
